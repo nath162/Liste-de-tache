@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      href="https://i.pngimg.me/thumb/f/720/m2i8i8m2i8d3m2i8.jpg"
+    />
+    <title>toDoList_nhdg</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      h1 {
+        font-family: "Courier New", Courier, monospace;
+        text-align: center;
+        font-style: italic;
+        color: rgb(69, 69, 184);
+      }
+      button {
+        border-radius: 12px;
+        width: 200px;
+        height: 50px;
+        transition-duration: 0.5s;
+      }
+      button.lstinterface:hover {
+        background-color: blueviolet;
+        color: azure;
+        box-shadow: 0 8px 16px 0 rgba(93, 106, 221, 0.2),
+          0 6px 20px 0 rgba(104, 122, 223, 0.19);
+      }
+      button.lstinterface {
+        background-color: rgb(180, 241, 241);
+        color: rgb(69, 69, 184);
+        border: 5px solid;
+        font-size: medium;
+        border-color: rgb(43, 43, 105);
+      }
+      button:active {
+        transform: translateY(10px);
+      }
+
+      div.emplacementlst {
+        overflow-x: scroll;
+        overflow-y: scroll;
+        height: 800px;
+        border: 5px solid;
+        border-radius: 12px;
+        border-color: darkblue;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      div.carte {
+        margin-top: 25px;
+        margin-left: 10px;
+        transition-duration: 0.5s;
+        height: 750px;
+        width: 450px;
+        border: 3px solid;
+        border-color: darkblue;
+        border-radius: 12px;
+      }
+      div.carte:hover {
+        box-shadow: 0 16px 32px 0 rgba(93, 106, 221, 0.2),
+          0 12px 40px 0 rgba(104, 122, 223, 0.19);
+      }
+      div.carte:active {
+        transform: translateY(10px);
+      }
+      textarea.nomlst {
+        font-size: medium;
+        font-family: "Courier New", Courier, monospace;
+        width: 98%;
+        margin-left: 4px;
+        border: 1px solid;
+        border-radius: 12px;
+        box-sizing: border-box;
+        border-color: aqua;
+        color: azure;
+        background-color: blueviolet;
+        font-style: oblique;
+        resize: none;
+        text-align: center;
+      }
+      div.apercutache {
+        box-sizing: border-box;
+        overflow-x: scroll;
+        overflow-y: scroll;
+        border: 1px solid;
+        border-radius: 12px;
+        border-color: aqua;
+        font-family: "Courier New", Courier, monospace;
+        margin: 5px;
+        height: 685px;
+        background-color: cadetblue;
+        color: aquamarine;
+      }
+      div.creationtacheinterface {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        border: 1px solid;
+        transform: translate(-50%, -50%);
+        border-radius: 12px;
+        border-color: rgb(0, 4, 255);
+        font-family: "Courier New", Courier, monospace;
+        background-color: cornflowerblue;
+        color: darkblue;
+        height: 200px;
+        width: 800px;
+      }
+      input.creationtache {
+        width: 750px;
+        height: 50px;
+        font-size: large;
+        margin: 15px;
+        border: 2px solid;
+        border-radius: 12px;
+        border-color: blue;
+      }
+    </style>
+    <script>
+      var selectedCarte = null;
+
+      function createcarte(content = "") {
+        var carte = document.createElement("div");
+        carte.className = "carte";
+        var textarea = document.createElement("textarea");
+        textarea.className = "nomlst";
+        textarea.maxLength = 64;
+        textarea.required = true;
+        textarea.placeholder = "nom de la liste de tache";
+        textarea.value = content;
+
+        var apercutache = document.createElement("div");
+        apercutache.className = "apercutache";
+
+        carte.appendChild(textarea);
+        carte.appendChild(apercutache);
+        document.querySelector(".emplacementlst").appendChild(carte);
+
+        carte.addEventListener("click", function () {
+          selectedCarte = carte;
+          afficherit();
+        });
+      }
+
+      function afficherit() {
+        var creationtacheinterface = document.querySelector(".creationtacheinterface");
+        creationtacheinterface.style.display = "block";
+      }
+
+      function fermecreationtache() {
+        var creationtacheinterface = document.querySelector(".creationtacheinterface");
+        creationtacheinterface.style.display = "none";
+      }
+
+      function ajoutertache() {
+        if (selectedCarte) {
+          var texte = document.querySelector(".creationtache").value;
+          var apercutache = selectedCarte.querySelector(".apercutache");
+          var li = document.createElement("div");
+          li.innerHTML = `<input type="checkbox" onclick="supprimertache(this)"> ${texte}`;
+          apercutache.appendChild(li);
+          fermecreationtache();
+        }
+      }
+
+      function supprimertache(checkbox) {
+        var li = checkbox.parentElement;
+        var apercutache = li.parentElement;
+        apercutache.removeChild(li);
+        sauvegarder(); 
+      }
+
+      function sauvegarder() {
+        var cartes = document.querySelectorAll(".carte");
+        var cartesData = [];
+        cartes.forEach(function (carte) {
+          var textarea = carte.querySelector(".nomlst");
+          var taches = [];
+          carte.querySelectorAll(".apercutache div").forEach(function (tache) {
+            taches.push(tache.textContent.trim());
+          });
+          cartesData.push({ title: textarea.value, taches: taches });
+        });
+        window.localStorage.setItem("cartes", JSON.stringify(cartesData));
+      }
+
+      function ouvrircarteapréssuvegarde() {
+        var cartesData = JSON.parse(window.localStorage.getItem("cartes"));
+        if (cartesData) {
+          cartesData.forEach(function (data) {
+            createcarte(data.title);
+            var carte = document.querySelector(".carte:last-child");
+            var apercutache = carte.querySelector(".apercutache");
+            data.taches.forEach(function (tache) {
+              var li = document.createElement("div");
+              li.innerHTML = `<input type="checkbox" onclick="supprimertache(this)"> ${tache}`;
+              apercutache.appendChild(li);
+            });
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", ouvrircarteapréssuvegarde);
+    </script>
+  </head>
+  <body>
+    <div class="zone titre">
+      <button class="lstinterface" onclick="createcarte()">
+        Créer une nouvelle liste de tache
+      </button>
+      <button class="lstinterface" onclick="sauvegarder()">sauvegarder</button>
+      <h1>liste de tache :</h1>
+    </div>
+    <div class="emplacementlst"></div>
+    <div class="creationtacheinterface">
+      <div class="pop-up">
+        <span class="pop-uptext">
+          <input type="text" class="creationtache" />
+          <button class="lstinterface" onclick="fermecreationtache()">
+            return
+          </button>
+          <button class="lstinterface" onclick="ajoutertache()">
+            ajouter tache
+          </button>
+        </span>
+      </div>
+    </div>
+  </body>
+</html>
